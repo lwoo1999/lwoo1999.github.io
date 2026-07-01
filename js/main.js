@@ -7,6 +7,8 @@
 
   // ----- Language (default: English) -----
   const langToggle = document.getElementById('langToggle');
+  const navLinks = document.getElementById('navLinks');
+  const menuToggle = document.getElementById('menuToggle');
   const html = document.documentElement;
   let currentLang = 'en';
 
@@ -98,9 +100,6 @@
   });
 
   // ----- Mobile Menu -----
-  const menuToggle = document.getElementById('menuToggle');
-  const navLinks = document.getElementById('navLinks');
-
   menuToggle.addEventListener('click', function () {
     navLinks.classList.toggle('open');
   });
