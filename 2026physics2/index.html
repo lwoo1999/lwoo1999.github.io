@@ -8,7 +8,6 @@
     * { box-sizing: border-box; }
     body { margin: 0; font-family: -apple-system, BlinkMacSystemFont, "Microsoft YaHei", sans-serif; color: #23364c; background: #eef3f5; }
     main { width: min(100% - 32px, 520px); margin: 9vh auto; padding: 36px; background: white; border-radius: 16px; box-shadow: 0 12px 36px rgba(33,57,73,.1); }
-    .eyebrow { color: #347783; font-size: 14px; letter-spacing: .08em; font-weight: 600; }
     h1 { font-size: 28px; margin: 12px 0; }
     p { line-height: 1.65; color: #536878; }
     label { display: block; margin: 22px 0 8px; font-weight: 600; }
@@ -27,9 +26,8 @@
 </head>
 <body>
 <main>
-  <div class="eyebrow">大学物理 · 作业</div>
   <h1>查询作业记录</h1>
-  <p>请输入名单上的姓名和学号，查询作业提交状态和分数。</p>
+  <p>请输入姓名和学号，查询作业提交状态和分数。</p>
   <form id="form">
     <label for="name">姓名</label><input id="name" name="name" required maxlength="30" autocomplete="off">
     <label for="student_id">学号</label><input id="student_id" name="student_id" required inputmode="numeric" pattern="[0-9]{9}" maxlength="9" autocomplete="off">
