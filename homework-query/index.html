@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>大学物理作业查询</title>
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; font-family: -apple-system, BlinkMacSystemFont, "Microsoft YaHei", sans-serif; color: #23364c; background: #eef3f5; }
+    main { width: min(100% - 32px, 520px); margin: 9vh auto; padding: 36px; background: white; border-radius: 16px; box-shadow: 0 12px 36px rgba(33,57,73,.1); }
+    .eyebrow { color: #347783; font-size: 14px; letter-spacing: .08em; font-weight: 600; }
+    h1 { font-size: 28px; margin: 12px 0; }
+    p { line-height: 1.65; color: #536878; }
+    label { display: block; margin: 22px 0 8px; font-weight: 600; }
+    input { width: 100%; font: inherit; padding: 12px; border: 1px solid #b7c8ce; border-radius: 8px; }
+    input:focus { outline: 3px solid #aed6d7; border-color: #347783; }
+    button { margin-top: 26px; width: 100%; padding: 13px; border: 0; border-radius: 8px; background: #276d78; color: white; font: inherit; font-weight: 600; cursor: pointer; }
+    button:focus { outline: 3px solid #aed6d7; }
+    #result { margin-top: 24px; padding: 16px; border-radius: 8px; background: #f1f7f7; line-height: 1.65; }
+    #result[hidden] { display: none; }
+    #result p { margin: 6px 0; }
+    table { width: 100%; border-collapse: collapse; margin-top: 8px; }
+    th, td { padding: 10px 8px; border-bottom: 1px solid #d7e5e7; text-align: left; }
+    th { font-size: 14px; color: #536878; }
+    @media (max-width: 520px) { main { padding: 24px; margin-top: 24px; } }
+  </style>
+</head>
+<body>
+<main>
+  <div class="eyebrow">大学物理 · 作业</div>
+  <h1>查询作业记录</h1>
+  <p>请输入名单上的姓名和学号，查询作业提交状态和分数。</p>
+  <form id="form">
+    <label for="name">姓名</label><input id="name" name="name" required maxlength="30" autocomplete="off">
+    <label for="student_id">学号</label><input id="student_id" name="student_id" required inputmode="numeric" pattern="[0-9]{9}" maxlength="9" autocomplete="off">
+    <button type="submit">查询</button>
+  </form>
+  <section id="result" role="status" aria-live="polite" hidden></section>
+</main>
+<script>
+  document.getElementById('form').addEventListener('submit', async function (event) {
+    event.preventDefault();
+    var box = document.getElementById('result'); box.hidden = false; box.textContent = '正在查询…';
+    try {
+      var response = await fetch('./records.json', {cache:'no-store'});
+      if (!response.ok) throw new Error('query failed');
+      var data = await response.json();
+      if (!data.ready) { box.textContent = '查询尚未开放，请向老师咨询。'; return; }
+      var name = document.getElementById('name').value.trim();
+      var id = document.getElementById('student_id').value.trim();
+      var matches = data.records.filter(function (row) { return row.name === name && row.student_id === id; });
+      box.textContent = '';
+      if (matches.length !== 1) {
+        box.textContent = '身份或记录待核实，请联系老师。'; return;
+      }
+      if (!Array.isArray(data.assignments) || !data.assignments.length) {
+        box.textContent = '暂无可查询的作业，请联系老师。'; return;
+      }
+      var table = document.createElement('table');
+      var head = document.createElement('tr');
+      ['作业', '提交状态', '分数'].forEach(function (text) {
+        var th = document.createElement('th'); th.textContent = text; head.appendChild(th);
+      });
+      table.appendChild(head);
+      data.assignments.forEach(function (assignment) {
+        var entry = (matches[0].assignments || {})[assignment.id] || {};
+        var status = entry.status === 'submitted' ? '已提交' : entry.status === 'not_submitted' ? '未交' : '待核实';
+        var score = '—';
+        if (entry.status === 'submitted' && typeof entry.score === 'number' && entry.score >= 0 && entry.score <= 100) {
+          score = entry.score + ' 分' + (entry.score_status === 'confirmed' ? '' : '（暂定）');
+        } else if (entry.status === 'submitted') { score = '待核实'; }
+        var tr = document.createElement('tr');
+        [assignment.title, status, score].forEach(function (text) {
+          var td = document.createElement('td'); td.textContent = text; tr.appendChild(td);
+        });
+        table.appendChild(tr);
+      });
+      box.appendChild(table);
+    } catch (error) { box.textContent = '暂时无法查询，请稍后重试或联系老师。'; }
+  });
+</script>
+</body>
+</html>
